@@ -1,12 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { Container } from "./styles"
 
+interface Transaction {
+  id: number;
+  title: string;
+  amount: number;
+  type: string;
+  category: string;
+  createdAt: string;
+}
+
+interface TransactionsResponse {
+  transactions: Array<Transaction>;
+}
+
 function Transactions() {
 
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  function moneyFormat(number: number) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(number);
+  }
+
+  function dateFormat(date: string) {
+    return new Intl.DateTimeFormat('pt-BR').format(new Date(date));
+  }
+
   useEffect(() => {
-    api.get('/transactions')
-      .then(res => console.log(res.data));
+    api.get<TransactionsResponse>('/transactions')
+      .then(response => {
+        // console.log(response.data);
+        setTransactions(response.data.transactions);
+      });
   }, []);
 
   return (
@@ -21,18 +50,20 @@ function Transactions() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Desenvolvimento de site</td>
-            <td className="deposit">R$ 16.000,00</td>
-            <td>Venda</td>
-            <td>16/02/2021</td>
-          </tr>
-          <tr>
-            <td>Aluguel do apartamento</td>
-            <td className="withdraw">R$ 1.000,00</td>
-            <td>Aluguel</td>
-            <td>16/03/2021</td>
-          </tr>
+          {
+            transactions.map((transaction) => (
+              <tr key={transaction.id}>
+                <td>{transaction.title}</td>
+                <td className={transaction.type}>
+                  {moneyFormat(transaction.amount)}
+                </td>
+                <td>{transaction.category}</td>
+                <td>{dateFormat(transaction.createdAt)}</td>
+              </tr>
+            ))
+          }
+
+
         </tbody>
       </table>
     </Container>
