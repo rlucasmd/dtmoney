@@ -1,23 +1,11 @@
-import { useEffect, useState } from "react";
-import { api } from "../../services/api";
+import { useContext } from "react";
+import { TransactionsContext } from "../../hooks/useTransaction";
 import { Container } from "./styles"
-
-interface Transaction {
-  id: number;
-  title: string;
-  amount: number;
-  type: string;
-  category: string;
-  createdAt: string;
-}
-
-interface TransactionsResponse {
-  transactions: Array<Transaction>;
-}
 
 function Transactions() {
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { transactions } = useContext(TransactionsContext);
+
 
   function moneyFormat(number: number) {
     return new Intl.NumberFormat('pt-BR', {
@@ -30,13 +18,6 @@ function Transactions() {
     return new Intl.DateTimeFormat('pt-BR').format(new Date(date));
   }
 
-  useEffect(() => {
-    api.get<TransactionsResponse>('/transactions')
-      .then(response => {
-        // console.log(response.data);
-        setTransactions(response.data.transactions);
-      });
-  }, []);
 
   return (
     <Container>
